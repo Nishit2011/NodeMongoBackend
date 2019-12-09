@@ -13,23 +13,49 @@ const asyncHandler = require("../middleware/async");
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
   let query;
 
+  //Copy req.query
+  const reqQuery = { ...req.query };
+
+  //Fields to exclude
+  const removeFields = ["select", "sort"];
+
+  //Loop over removeFields and delete them from reqQuery
+  removeFields.forEach(param => delete reqQuery[param]);
+
   //fetching query parameters from request
   //http://localhost:5000/api/v1/bootcamps?housing=true&&location.state=MA
   //in the above request obj, housing=true and location.state are query params
-  let queryStr = JSON.stringify(req.query);
+
+  //Create query string
+  let queryStr = JSON.stringify(reqQuery);
 
   //trying to edit the query params fetched from req by adding money sign
   //so that greater and lesser than operation can be executed and those operations in mongoose use $gte, $lt etc
   //so when a req of the form http://localhost:5000/api/v1/bootcamps/?averageCost[lte]=10000 is made
   //using the below operation, it is turned into  {"averageCost":{"$lte":"10000"}} to get the results of those data that have average cost less than or equal to 10000
 
+  //Create operators($gt $gte etc)
   queryStr = queryStr.replace(/\b(gte|gte|lt|lte|in)\b/g, match => `$${match}`);
 
   //parsing back the query string to be executed by mongoose
-
+  ///Finding resources
   query = Bootcamp.find(JSON.parse(queryStr));
 
-  console.log(queryStr);
+  //Select Fields
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    query = query.select(fields);
+  }
+
+  //Sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort("-createdAt");
+  }
+
+  //Executing query
 
   const bootcamps = await query;
 
