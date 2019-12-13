@@ -163,6 +163,10 @@ exports.updateBootcamp = async (req, res, next) => {
 exports.deleteBootcamp = async (req, res, next) => {
   try {
     //getting the bootcamp
+    //findByIdandDelete is changed to findById and remove method is used
+    //to enforce cascading delete functionality, which means once Bootcamp is deleted
+    //course will be deleted too.
+
     const bootcamp = await Bootcamp.findById(req.params.id);
     bootcamp.remove();
     res.status(200).json({ success: true, data: {} });
