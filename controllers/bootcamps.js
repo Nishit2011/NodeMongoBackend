@@ -39,7 +39,9 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
   //parsing back the query string to be executed by mongoose
   ///Finding resources
-  query = Bootcamp.find(JSON.parse(queryStr));
+  //populating bootcamp document with course document based on the Virtuals created
+  //in Bootcamp model
+  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
   //Select Fields
   if (req.query.select) {
@@ -160,7 +162,9 @@ exports.updateBootcamp = async (req, res, next) => {
 //@access Public
 exports.deleteBootcamp = async (req, res, next) => {
   try {
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+    //getting the bootcamp
+    const bootcamp = await Bootcamp.findById(req.params.id);
+    bootcamp.remove();
     res.status(200).json({ success: true, data: {} });
     if (!bootcamp) {
       return next(
