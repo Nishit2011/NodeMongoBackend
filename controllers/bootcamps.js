@@ -168,6 +168,8 @@ exports.deleteBootcamp = async (req, res, next) => {
     //course will be deleted too.
 
     const bootcamp = await Bootcamp.findById(req.params.id);
+
+    //Using the middleware remove method instead of using findByIdAndDelete
     bootcamp.remove();
     res.status(200).json({ success: true, data: {} });
     if (!bootcamp) {
