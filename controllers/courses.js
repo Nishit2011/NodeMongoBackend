@@ -127,6 +127,7 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
   }
   //using the middleware method remove to remove instead of using
   //findByIdAndDelete
+  //remove is a SchemaMethod that is invoked only by instance of Mongoose Document
   await course.remove();
 
   res.status(200).json({

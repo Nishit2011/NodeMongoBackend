@@ -1,3 +1,4 @@
+const path = require("path");
 const geocoder = require("../utils/geocoder");
 const Bootcamp = require("../models/Bootcamp");
 const ErrorResponse = require("../utils/errorResponse");
@@ -11,80 +12,82 @@ const asyncHandler = require("../middleware/async");
 //@route GET /api/v1/bootcamps
 //@access Public
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
-  let query;
+  //Commented Code has been moved to Middleware advancedResult.js
 
-  //Copy req.query
-  const reqQuery = { ...req.query };
+  // let query;
 
-  //Fields to exclude
-  const removeFields = ["select", "sort", "page", "limit"];
+  // //Copy req.query
+  // const reqQuery = { ...req.query };
 
-  //Loop over removeFields and delete them from reqQuery
-  removeFields.forEach(param => delete reqQuery[param]);
+  // //Fields to exclude
+  // const removeFields = ["select", "sort", "page", "limit"];
 
-  //fetching query parameters from request
-  //http://localhost:5000/api/v1/bootcamps?housing=true&&location.state=MA
-  //in the above request obj, housing=true and location.state are query params
+  // //Loop over removeFields and delete them from reqQuery
+  // removeFields.forEach(param => delete reqQuery[param]);
 
-  //Create query string
-  let queryStr = JSON.stringify(reqQuery);
+  // //fetching query parameters from request
+  // //http://localhost:5000/api/v1/bootcamps?housing=true&&location.state=MA
+  // //in the above request obj, housing=true and location.state are query params
 
-  //trying to edit the query params fetched from req by adding money sign
-  //so that greater and lesser than operation can be executed and those operations in mongoose use $gte, $lt etc
-  //so when a req of the form http://localhost:5000/api/v1/bootcamps/?averageCost[lte]=10000 is made
-  //using the below operation, it is turned into  {"averageCost":{"$lte":"10000"}} to get the results of those data that have average cost less than or equal to 10000
+  // //Create query string
+  // let queryStr = JSON.stringify(reqQuery);
 
-  //Create operators($gt $gte etc)
-  queryStr = queryStr.replace(/\b(gte|gte|lt|lte|in)\b/g, match => `$${match}`);
+  // //trying to edit the query params fetched from req by adding money sign
+  // //so that greater and lesser than operation can be executed and those operations in mongoose use $gte, $lt etc
+  // //so when a req of the form http://localhost:5000/api/v1/bootcamps/?averageCost[lte]=10000 is made
+  // //using the below operation, it is turned into  {"averageCost":{"$lte":"10000"}} to get the results of those data that have average cost less than or equal to 10000
 
-  //parsing back the query string to be executed by mongoose
-  ///Finding resources
-  //populating bootcamp document with course document based on the Virtuals created
-  //in Bootcamp model
-  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
+  // //Create operators($gt $gte etc)
+  // queryStr = queryStr.replace(/\b(gte|gte|lt|lte|in)\b/g, match => `$${match}`);
 
-  //Select Fields
-  if (req.query.select) {
-    const fields = req.query.select.split(",").join(" ");
-    query = query.select(fields);
-  }
+  // //parsing back the query string to be executed by mongoose
+  // ///Finding resources
+  // //populating bootcamp document with course document based on the Virtuals created
+  // //in Bootcamp model
+  // query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
-  //Sort
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort("-createdAt");
-  }
+  // //Select Fields
+  // if (req.query.select) {
+  //   const fields = req.query.select.split(",").join(" ");
+  //   query = query.select(fields);
+  // }
 
-  //Pagination
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 1;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Bootcamp.countDocuments();
+  // //Sort
+  // if (req.query.sort) {
+  //   const sortBy = req.query.sort.split(",").join(" ");
+  //   query = query.sort(sortBy);
+  // } else {
+  //   query = query.sort("-createdAt");
+  // }
 
-  query = query.skip(startIndex).limit(limit);
+  // //Pagination
+  // const page = parseInt(req.query.page, 10) || 1;
+  // const limit = parseInt(req.query.limit, 10) || 1;
+  // const startIndex = (page - 1) * limit;
+  // const endIndex = page * limit;
+  // const total = await Bootcamp.countDocuments();
 
-  //Executing query
+  // query = query.skip(startIndex).limit(limit);
 
-  const bootcamps = await query;
+  // //Executing query
 
-  //Pagination result
-  const pagination = {};
-  if (endIndex < total) {
-    pagination.next = {
-      page: page + 1,
-      limit
-    };
-  }
+  // const bootcamps = await query;
 
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit
-    };
-  }
+  // //Pagination result
+  // const pagination = {};
+  // if (endIndex < total) {
+  //   pagination.next = {
+  //     page: page + 1,
+  //     limit
+  //   };
+  // }
+
+  // if (startIndex > 0) {
+  //   pagination.prev = {
+  //     page: page - 1,
+  //     limit
+  //   };
+  // }
 
   res.status(200).json({
     success: true,
@@ -118,7 +121,7 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 exports.createBootcamp = async (req, res, next) => {
   try {
     const bootcamp = await Bootcamp.create(req.body);
-    console.log(bootcamp);
+    //console.log(bootcamp);
     res.status(201).json({
       success: true,
       data: bootcamp
@@ -205,4 +208,56 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ success: true, count: bootcamps.length, data: bootcamps });
+});
+
+// @desc      Upload photo for bootcamp
+// @route     PUT /api/v1/bootcamps/:id/photo
+// @access    Private
+exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findById(req.params.id);
+
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    );
+  }
+
+  if (!req.files) {
+    return next(new ErrorResponse(`Please upload a file`, 400));
+  }
+
+  const file = req.files[""];
+  //console.log(req.files[""]["mimetype"]);
+
+  // Make sure the image is a photo
+  if (!file.mimetype.startsWith("image")) {
+    return next(new ErrorResponse(`Please upload an image file`, 400));
+  }
+
+  // Check filesize
+  if (file.size > process.env.MAX_FILE_UPLOAD) {
+    return next(
+      new ErrorResponse(
+        `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+        400
+      )
+    );
+  }
+
+  // Create custom filename
+  file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`;
+
+  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+    if (err) {
+      console.error(err);
+      return next(new ErrorResponse(`Problem with file upload`, 500));
+    }
+
+    await Bootcamp.findByIdAndUpdate(req.params.id, { photo: file.name });
+
+    res.status(200).json({
+      success: true,
+      data: file.name
+    });
+  });
 });
