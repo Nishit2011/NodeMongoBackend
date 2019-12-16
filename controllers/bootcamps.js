@@ -222,6 +222,8 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
   }
 
   const file = req.files[""];
+  console.log("file upload");
+
   //console.log(req.files[""]["mimetype"]);
 
   // Make sure the image is a photo
@@ -242,6 +244,7 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
   // Create custom filename
   file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`;
 
+  // Use the mv() method to place the file somewhere on your server
   file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
     if (err) {
       console.error(err);

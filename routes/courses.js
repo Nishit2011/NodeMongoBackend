@@ -8,6 +8,8 @@ const {
 } = require("../controllers/courses");
 const router = express.Router({ mergeParams: true });
 const Course = require("../models/Course");
+//We will add this method to whichever route that needs to be protected
+const { protect } = require("../middleware/auth");
 const advancedResults = require("../middleware/advancedResult");
 
 router
@@ -19,11 +21,11 @@ router
     }),
     getCourses
   )
-  .post(addCourse);
+  .post(protect, addCourse);
 router
   .route("/:id")
   .get(getCourse)
-  .put(updateCourse)
-  .delete(deleteCourse);
+  .put(protect, updateCourse)
+  .delete(protect, deleteCourse);
 
 module.exports = router;

@@ -47,8 +47,8 @@ UserSchema.pre("save", async function(next) {
 
 UserSchema.methods.getSignedJwtToken = function() {
   //passing the payload to jwt sign in method, along with other params,
-  //this method will be available to instances of this schema
-  //an instance in controller will invoke this method and a jwt token will be created
+  //this method will be available to objects made of this schema model
+  //an object in controller will invoke this method and a jwt token will be created
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES
   });

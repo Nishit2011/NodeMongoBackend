@@ -144,11 +144,12 @@ BootcampSchema.pre("remove", async function(next) {
 //Using this we can populate Bootcamp documents with Course document
 //based on the relationship established in the Course model.
 //After doing this, we need to add respective query in bootcamp query controller
-BootcampSchema.virtual("courses", {
-  ref: "Course",
-  localField: "_id",
-  foreignField: "bootcamp",
-  justOne: false
-});
+
+// BootcampSchema.virtual("courses", {
+//   ref: "Course",
+//   localField: "_id",
+//   foreignField: "bootcamp",
+//   justOne: false
+// });
 
 module.exports = mongoose.model("Bootcamp", BootcampSchema);
